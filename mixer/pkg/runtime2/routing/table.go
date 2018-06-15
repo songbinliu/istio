@@ -120,17 +120,25 @@ func (t *Table) ID() int64 {
 func (t *Table) GetDestinations(variety tpb.TemplateVariety, namespace string) *NamespaceTable {
 	destinations, ok := t.entries[variety]
 	if !ok {
-		log.Debugf("No destinations found for variety: table='%d', variety='%d'", t.id, variety)
+		log.Errorf("No destinations found for variety: table='%d', variety='%d'", t.id, variety)
 
 		return emptyDestinations
 	}
 
+	for ns, v := range destinations.entries {
+		log.Errorf("xxx ns=%v, len=%v", ns, len(v.entries))
+	}
+
 	destinationSet := destinations.entries[namespace]
 	if destinationSet == nil {
-		log.Debugf("no rules for namespace, using defaults: table='%d', variety='%d', ns='%s'", t.id, variety, namespace)
+		log.Errorf("no rules for namespace, using defaults: table='%d', variety='%d', ns='%s'", t.id, variety, namespace)
 		destinationSet = destinations.defaultSet
 	}
 
+	log.Errorf("xxx nvariety=%v, namespace=%v", variety, namespace)
+	for _, d := range destinationSet.entries {
+		log.Errorf("\t adapter=%v, handler=%v", d.AdapterName, d.HandlerName)
+	}
 	return destinationSet
 }
 

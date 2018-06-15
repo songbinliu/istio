@@ -142,7 +142,7 @@ func (b *builder) nextID() uint32 {
 func (b *builder) build(config *config.Snapshot) {
 
 	for _, rule := range config.Rules {
-
+		log.Warnf("xxx rule=[%v, %v]", rule.Namespace, rule.Name)
 		// Create a compiled expression for the rule condition first.
 		condition, err := b.getConditionExpression(rule)
 		if err != nil {
@@ -178,6 +178,8 @@ func (b *builder) build(config *config.Snapshot) {
 					continue
 				}
 
+				log.Warnf("\t rule[%v], handler=%v, instance.Name=%v", rule.Name, handlerName, instance.Name)
+
 				b.add(rule.Namespace, instance.Template, entry, condition, builder, mapper,
 					entry.Name, instance.Name, rule.Match, rule.ResourceType)
 			}
@@ -203,6 +205,7 @@ func (b *builder) build(config *config.Snapshot) {
 					continue
 				}
 
+				log.Warnf("xxx default-ns=%v, current.ns=%v, len=%d", b.defaultConfigNamespace, namespace, len(defaultSet.entries))
 				set.entries = append(defaultSet.entries, set.entries...)
 			}
 		}

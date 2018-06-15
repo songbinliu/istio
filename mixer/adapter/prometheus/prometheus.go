@@ -58,6 +58,7 @@ type (
 	handler struct {
 		srv     server
 		metrics map[string]*cinfo
+		env adapter.Env
 	}
 )
 
@@ -107,6 +108,14 @@ func (b *builder) clearState() {
 func (b *builder) SetMetricTypes(map[string]*metric.Type) {}
 func (b *builder) SetAdapterConfig(cfg adapter.Config)    { b.cfg = cfg.(*config.Params) }
 func (b *builder) Validate() *adapter.ConfigErrors        { return nil }
+
+func (b *builder) printMetrics(env adapter.Env) {
+	env.Logger().Warningf("xxx prometheus.metrics.num = %d", len(b.cfg.Metrics));
+	for _, m := range b.cfg.Metrics {
+		env.Logger().Warningf("xxxx name: %v, labels=%v;", m.InstanceName, m.LabelNames)
+	}
+}
+
 func (b *builder) Build(ctx context.Context, env adapter.Env) (adapter.Handler, error) {
 
 	cfg := b.cfg
@@ -181,11 +190,19 @@ func (b *builder) Build(ctx context.Context, env adapter.Env) (adapter.Handler, 
 		}
 	}
 
+	b.printMetrics(env)
+
 	if err := b.srv.Start(env, promhttp.HandlerFor(b.registry, promhttp.HandlerOpts{})); err != nil {
 		return nil, err
 	}
 
-	return &handler{b.srv, b.metrics}, metricErr.ErrorOrNil()
+	h := &handler {
+		srv: b.srv,
+		metrics: b.metrics,
+		env: env,
+	}
+	//return &handler{b.srv, b.metrics}, metricErr.ErrorOrNil()
+	return h, metricErr.ErrorOrNil()
 }
 
 func (h *handler) HandleMetric(_ context.Context, vals []*metric.Instance) error {
@@ -193,7 +210,9 @@ func (h *handler) HandleMetric(_ context.Context, vals []*metric.Instance) error
 
 	for _, val := range vals {
 		ci := h.metrics[val.Name]
+		h.env.Logger().Warningf("xxx handle metric[%s] from prometheus.", val.Name)
 		if ci == nil {
+			h.env.Logger().Errorf("could not find metric info for: %v", val.Name)
 			result = multierror.Append(result, fmt.Errorf("could not find metric info from adapter config for %s", val.Name))
 			continue
 		}

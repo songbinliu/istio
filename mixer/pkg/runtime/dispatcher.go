@@ -170,10 +170,11 @@ func (m *dispatcher) dispatch(ctx context.Context, requestBag attribute.Bag, var
 	// Defer guarantees both.
 	defer calls.Done()
 
-	log.Debugf("Resolved (%v) %d actions", variety, len(calls.Get()))
+	log.Infof("Resolved (%v) %d actions", variety, len(calls.Get()))
 
 	ra := make([]*runArg, 0, len(calls.Get()))
 	for _, call := range calls.Get() {
+		log.Infof("\t adapter=%v, handler=%v", call.adapterName, call.handlerName)
 		for _, df := range genDispatchFn(call) {
 			ra = append(ra, &runArg{
 				call,
