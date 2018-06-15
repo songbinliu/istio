@@ -116,9 +116,9 @@ func (s *grpcServer) Check(legacyCtx legacyContext.Context, req *mixerpb.CheckRe
 	}
 
 	if status.IsOK(cr.Status) {
-		log.Debug("Check approved")
+		log.Error("xxx Check approved")
 	} else {
-		log.Debugf("Check denied: %v", cr.Status)
+		log.Errorf("xxx Check denied: %v", cr.Status)
 	}
 
 	resp := &mixerpb.CheckResponse{
@@ -227,12 +227,13 @@ func (s *grpcServer) Report(legacyCtx legacyContext.Context, req *mixerpb.Report
 			break
 		}
 
-		log.Debug("Dispatching to main adapters after running preprocessors")
-		log.Debuga("Attribute Bag: \n", reportBag)
-		log.Debugf("Dispatching Report %d out of %d", i, len(req.Attributes))
+		log.Info("Dispatching to main adapters after running preprocessors")
+		log.Infoa("Attribute Bag: \n", reportBag)
+		log.Infof("Dispatching Report %d out of %d", i, len(req.Attributes))
 
 		err = s.dispatcher.Report(legacyCtx, reportBag)
 		if err != nil {
+			log.Errorf("dispatch failed: %v", err.Error())
 			span.LogFields(otlog.String("error", err.Error()))
 			span.Finish()
 			break

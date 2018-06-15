@@ -156,6 +156,7 @@ func (c *Runtime) onConfigChange(events []*store.Event) {
 }
 
 func (c *Runtime) processNewConfig() {
+	log.Info("xxx begin to process new config")
 	newSnapshot := c.ephemeral.BuildSnapshot()
 
 	oldHandlers := c.handlers

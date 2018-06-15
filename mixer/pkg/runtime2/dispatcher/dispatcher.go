@@ -191,6 +191,7 @@ func (d *Dispatcher) dispatch(session *session) error {
 		return err
 	}
 	namespace := getNamespace(identityAttributeValue)
+	log.Infof("id.attr [%v]=[%v]", d.identityAttribute, identityAttributeValue)
 
 	// Capture the routing context locally. It can change underneath us. We also need to decRef before
 	// completing the call.
@@ -402,7 +403,7 @@ func doDispatchToHandler(param interface{}) {
 	var start time.Time
 	span, ctx, start = s.beginSpan(ctx)
 
-	log.Debugf("begin dispatch: destination='%s'", s.destination.FriendlyName)
+	log.Infof("begin dispatch: destination='%s'", s.destination.FriendlyName)
 
 	switch s.destination.Template.Variety {
 	case tpb.TEMPLATE_VARIETY_ATTRIBUTE_GENERATOR:
@@ -425,7 +426,7 @@ func doDispatchToHandler(param interface{}) {
 		panic(fmt.Sprintf("unknown variety type: '%v'", s.destination.Template.Variety))
 	}
 
-	log.Debugf("complete dispatch: destination='%s' {err:%v}", s.destination.FriendlyName, s.err)
+	log.Infof("complete dispatch: destination='%s' {err:%v}", s.destination.FriendlyName, s.err)
 
 	s.completeSpan(span, time.Since(start), s.err)
 	s.session.completed <- s

@@ -1,0 +1,56 @@
+#---
+## define the CRD kind mysampleadapter
+#kind: CustomResourceDefinition
+#apiVersion: apiextensions.k8s.io/v1beta1
+#metadata:
+#  name: mysampleadapter.config.istio.io
+#  labels:
+#    package: adapter
+#    istio: mixer-adapter
+#spec:
+#  group: config.istio.io
+#  names:
+#    kind: mysampleadapter
+#    plural: mysampleadapter
+#    singular: mysampleadapter
+#  scope: Namespaced
+#  version: v1alpha2
+#---
+## instance configuration for template 'metric'
+#apiVersion: "config.istio.io/v1alpha2"
+#kind: metric
+#metadata:
+# name: requestcount
+# namespace: istio-system
+#spec:
+# value: "1"
+# dimensions:
+#   source: source.labels["app"] | "unknown"
+#   target: destination.service | "unknown"
+#   service: destination.labels["app"] | "unknown"
+#   method: request.path | "unknown"
+#   version: destination.labels["version"] | "unknown"
+#   response_code: response.code | 200
+# monitored_resource_type: '"UNSPECIFIED"'
+---
+# handler configuration for adapter 'metric'
+apiVersion: "config.istio.io/v1alpha2"
+kind: mysampleadapter
+metadata:
+ name: hndlrtest
+ namespace: istio-system
+spec:
+ file_path: "/tmp/my.adapter.out.txt"
+---
+# rule to dispatch to your handler
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+ name: mysamplerule
+ namespace: istio-system
+spec:
+ match: "true"
+ actions:
+ - handler: hndlrtest.mysampleadapter.istio-system
+   instances:
+   - requestcount.metric.istio-system
